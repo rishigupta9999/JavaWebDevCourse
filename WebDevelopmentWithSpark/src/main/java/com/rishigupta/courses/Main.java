@@ -5,6 +5,7 @@ import static spark.Spark.*;
 import com.rishigupta.courses.model.SimpleCourseIdeaDAO;
 import com.rishigupta.courses.model.CourseIdeaDAO;
 import com.rishigupta.courses.model.CourseIdea;
+import com.rishigupta.courses.model.NotFoundException;
 import spark.ModelAndView;
 import spark.template.handlebars.HandlebarsTemplateEngine;
 
@@ -67,6 +68,34 @@ public class Main {
             res.redirect("/");
 
             return null;
+        });
+
+        post("/ideas/:slug/vote", (req, res) -> {
+           CourseIdea idea = dao.findBySlug(req.params("slug"));
+           idea.addVoter(req.attribute("username"));
+
+           res.redirect("/ideas");
+           return null;
+        });
+
+        get("/ideas/:slug", (req, res) -> {
+            Map<String, Object> model = new HashMap<>();
+
+            CourseIdea idea = dao.findBySlug(req.params("slug"));
+
+            model.put("courseIdea", idea);
+            model.put("voters", idea.getVoters());
+
+            return new ModelAndView(model, "detail.hbs");
+        }, new HandlebarsTemplateEngine());
+
+        exception(NotFoundException.class, (exc, req, res) -> {
+           res.status(404);
+
+           HandlebarsTemplateEngine engine = new HandlebarsTemplateEngine();
+           String html = engine.render(new ModelAndView(null, "not-found.hbs"));
+
+           res.body(html);
         });
     }
 }

@@ -1,0 +1,15 @@
+{{#partial "title"}}
+    {{ courseIdea.title }}
+{{/partial}}
+
+{{#partial "content"}}
+    Voters are:<p>
+
+    <UL>
+    {{#each voters}}
+        <li>{{this}}</li>
+    {{/each}}
+    </UL>
+{{/partial}}
+
+{{> base.hbs }}
